@@ -13,11 +13,11 @@ public class RuleEngine {
             boolean colComplete;
             String firstCharacter;
             for(int i=0;i<3;i++){
-                firstCharacter = ticTacToeBoard.getCell(i,0);
+                firstCharacter = ticTacToeBoard.getSymbol(i,0);
                 rowComplete = firstCharacter != null;
                 if(firstCharacter != null) {
                     for (int j = 1; j < 3; j++) {
-                        if (!firstCharacter.equals(ticTacToeBoard.getCell(i, j))) {
+                        if (!firstCharacter.equals(ticTacToeBoard.getSymbol(i, j))) {
                             rowComplete = false;
                             break;
                         }
@@ -29,11 +29,11 @@ public class RuleEngine {
             }
 
             for(int i=0;i<3;i++){
-                firstCharacter = ticTacToeBoard.getCell(0,i);
+                firstCharacter = ticTacToeBoard.getSymbol(0,i);
                 colComplete = firstCharacter != null;
                 if(firstCharacter != null) {
                     for (int j = 1; j < 3; j++) {
-                        if (!firstCharacter.equals(ticTacToeBoard.getCell(j, i))) {
+                        if (!firstCharacter.equals(ticTacToeBoard.getSymbol(j, i))) {
                             colComplete = false;
                             break;
                         }
@@ -45,10 +45,10 @@ public class RuleEngine {
             }
 
 
-            firstCharacter = ticTacToeBoard.getCell(0,0);
+            firstCharacter = ticTacToeBoard.getSymbol(0,0);
             boolean diagComplete = firstCharacter != null;
             for (int i = 0; i < 3; i++) {
-                if (firstCharacter != null && !firstCharacter.equals(ticTacToeBoard.getCell(i, i))) {
+                if (firstCharacter != null && !firstCharacter.equals(ticTacToeBoard.getSymbol(i, i))) {
                     diagComplete = false;
                     break;
                 }
@@ -59,10 +59,10 @@ public class RuleEngine {
             }
 
 
-            firstCharacter = ticTacToeBoard.getCell(0,2);
+            firstCharacter = ticTacToeBoard.getSymbol(0,2);
             boolean revDiagComplete = firstCharacter != null;
             for (int i = 0; i < 3; i++) {
-                if (firstCharacter !=null && !firstCharacter.equals(ticTacToeBoard.getCell(i, 2 - i))) {
+                if (firstCharacter !=null && !firstCharacter.equals(ticTacToeBoard.getSymbol(i, 2 - i))) {
                     revDiagComplete = false;
                     break;
                 }
@@ -74,7 +74,7 @@ public class RuleEngine {
             int countOfFilledCells = 0;
             for(int i=0;i<3;i++){
                 for(int j=0;j<3;j++){
-                    if(ticTacToeBoard.getCell(i,j) != null){
+                    if(ticTacToeBoard.getSymbol(i,j) != null){
                         countOfFilledCells++;
                     }
                 }
