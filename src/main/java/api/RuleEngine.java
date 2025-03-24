@@ -3,10 +3,25 @@ package api;
 import boards.TicTacToeBoard;
 import game.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class RuleEngine {
+
+    Map<String, List<Rule<TicTacToeBoard>>> ruleMap = new HashMap<>();
+
+    public RuleEngine() {
+        ruleMap.put(TicTacToeBoard.class.getName(),new ArrayList<>());
+        ruleMap.get(TicTacToeBoard.class.getName()).add(new Rule<>(board -> outerTraversals(board::getSymbol)));
+        ruleMap.get(TicTacToeBoard.class.getName()).add(new Rule<>(board -> outerTraversals((row, col) -> board.getSymbol(col, row))));
+        ruleMap.get(TicTacToeBoard.class.getName()).add(new Rule<>(board -> traverse(i -> board.getSymbol(i,i))));
+        ruleMap.get(TicTacToeBoard.class.getName()).add(new Rule<>(board -> traverse(i -> board.getSymbol(i,2-i))));
+        ruleMap.get(TicTacToeBoard.class.getName()).add(new Rule<>(RuleEngine::countMoves));
+    }
 
     public GameInfo getInfo(Board board){
         if(board instanceof TicTacToeBoard){
@@ -50,39 +65,35 @@ public class RuleEngine {
     }
 
     public GameState getState(Board board){
-        if(board instanceof TicTacToeBoard) {
-            TicTacToeBoard ticTacToeBoard = (TicTacToeBoard) board;
-
-            GameState rowWin = findStreak((i,j) -> ticTacToeBoard.getSymbol(i,j));
-            if(rowWin != null) return rowWin;
-
-            GameState colWin = findStreak((i,j) -> ticTacToeBoard.getSymbol(j,i));
-            if(colWin != null) return colWin;
-
-            GameState diagWin = findDiagStreak(i -> ticTacToeBoard.getSymbol(i,i));
-            if (diagWin != null) return diagWin;
-
-            GameState revDiagWin = findDiagStreak(i -> ticTacToeBoard.getSymbol(i,2-i));
-            if (revDiagWin != null) return revDiagWin;
-
-            int countOfFilledCells = 0;
-            for(int i=0;i<3;i++){
-                for(int j=0;j<3;j++){
-                    if(ticTacToeBoard.getSymbol(i,j) != null){
-                        countOfFilledCells++;
-                    }
+        if(board instanceof TicTacToeBoard ticTacToeBoard) {
+            List<Rule<TicTacToeBoard>> rules = ruleMap.get(TicTacToeBoard.class.getName());
+            for(Rule<TicTacToeBoard> rule : rules){
+                GameState gameState = rule.condition.apply(ticTacToeBoard);
+                if(gameState != null && gameState.isOver()){
+                    return new GameState(true,"X");
                 }
             }
-            if(countOfFilledCells == 9) {
-                return new GameState(true,"-");
-            } else {
-                return new GameState(false,"-");
-            }
+            return new GameState(false,"-");
         }
         throw new IllegalArgumentException("Invalid board");
     }
 
-    private  GameState findDiagStreak(Function<Integer, String> diag) {
+    private static GameState countMoves(TicTacToeBoard ticTacToeBoard) {
+        int countOfFilledCells = 0;
+        for(int i=0;i<3;i++){
+            for(int j=0;j<3;j++){
+                if(ticTacToeBoard.getSymbol(i,j) != null){
+                    countOfFilledCells++;
+                }
+            }
+        }
+        if(countOfFilledCells == 9) {
+            return new GameState(true, "-");
+        }
+        return null;
+    }
+
+    private  GameState traverse(Function<Integer, String> diag) {
         boolean possibleStreak = true;
         for (int i = 0; i < 3; i++) {
             if (diag.apply(0) == null || !diag.apply(0).equals(diag.apply(i))) {
@@ -96,7 +107,7 @@ public class RuleEngine {
         return null;
     }
 
-    private GameState findStreak(BiFunction<Integer, Integer, String> next) {
+    private GameState outerTraversals(BiFunction<Integer, Integer, String> next) {
         for(int i = 0; i<3; i++){
             boolean possibleStreak = true;
             for (int j = 0; j < 3; j++) {
@@ -110,5 +121,13 @@ public class RuleEngine {
             }
         }
         return null;
+    }
+}
+
+class Rule<T extends Board>{
+    Function<T,GameState> condition;
+
+    public Rule(Function<T, GameState> condition) {
+        this.condition = condition;
     }
 }
