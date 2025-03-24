@@ -25,9 +25,8 @@ public class RuleEngine {
 
     public GameInfo getInfo(Board board){
         if(board instanceof TicTacToeBoard){
-            TicTacToeBoard ticTacToeBoard = (TicTacToeBoard) board;
             GameState gameState = getState(board);
-            String players[] = new String[]{"X","O"};
+            String[] players = new String[]{"X","O"};
             for(int index=0;index<2;index++) {
                 for (int i = 0; i < 3; i++) {
                     for (int j = 0; j < 3; j++) {
@@ -52,13 +51,21 @@ public class RuleEngine {
                                 }
                             }
                             if (canStillWin) {
-                                return new GameInfo(gameState, true, player.flip());
+                                 return new GameInfoBuilder()
+                                         .isOver(gameState.isOver())
+                                         .hasFork(true)
+                                         .player(player.flip())
+                                         .winner(gameState.getWinner())
+                                         .build();
                             }
                         }
                     }
                 }
             }
-            return new GameInfo(gameState,false,null);
+            return new GameInfoBuilder()
+                    .isOver(gameState.isOver())
+                    .winner(gameState.getWinner())
+                    .build();
         } else {
             throw new IllegalArgumentException();
         }
