@@ -1,8 +1,15 @@
 package boards;
 
+import api.Rule;
+import api.RuleEngine;
+import api.RuleSet;
 import game.Board;
 import game.Cell;
+import game.GameState;
 import game.Move;
+
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class TicTacToeBoard implements Board {
     String[][] cells = new String[3][3];
@@ -47,5 +54,60 @@ public class TicTacToeBoard implements Board {
             System.arraycopy(this.cells[i], 0, board.cells[i], 0, 3);
         }
         return board;
+    }
+
+    public static RuleSet<TicTacToeBoard> getRules(){
+        RuleSet<TicTacToeBoard> ruleSet = new RuleSet<>();
+        ruleSet.add(new Rule<>(board -> outerTraversals(board::getSymbol)));
+        ruleSet.add(new Rule<>(board -> outerTraversals((row, col) -> board.getSymbol(col, row))));
+        ruleSet.add(new Rule<>(board -> traverse(i -> board.getSymbol(i,i))));
+        ruleSet.add(new Rule<>(board -> traverse(i -> board.getSymbol(i,2-i))));
+        ruleSet.add(new Rule<>(TicTacToeBoard::countMoves));
+        return ruleSet;
+    }
+
+    private static GameState traverse(Function<Integer, String> diag) {
+        boolean possibleStreak = true;
+        for (int i = 0; i < 3; i++) {
+            if (diag.apply(0) == null || !diag.apply(0).equals(diag.apply(i))) {
+                possibleStreak = false;
+                break;
+            }
+        }
+        if(possibleStreak){
+            return new GameState(true, diag.apply(0));
+        }
+        return null;
+    }
+
+    private static GameState outerTraversals(BiFunction<Integer, Integer, String> next) {
+        for(int i = 0; i<3; i++){
+            boolean possibleStreak = true;
+            for (int j = 0; j < 3; j++) {
+                if (next.apply(i,j) == null || !next.apply(i,0).equals(next.apply(i, j))) {
+                    possibleStreak = false;
+                    break;
+                }
+            }
+            if (possibleStreak) {
+                return new GameState(true, next.apply(i,0));
+            }
+        }
+        return null;
+    }
+
+    private static GameState countMoves(TicTacToeBoard ticTacToeBoard) {
+        int countOfFilledCells = 0;
+        for(int i=0;i<3;i++){
+            for(int j=0;j<3;j++){
+                if(ticTacToeBoard.getSymbol(i,j) != null){
+                    countOfFilledCells++;
+                }
+            }
+        }
+        if(countOfFilledCells == 9) {
+            return new GameState(true, "-");
+        }
+        return null;
     }
 }
