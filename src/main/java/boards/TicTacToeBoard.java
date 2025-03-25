@@ -11,7 +11,7 @@ import game.Move;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class TicTacToeBoard implements Board {
+public class TicTacToeBoard implements CellBoard {
     String[][] cells = new String[3][3];
 
     public String getSymbol(int row, int col) {
@@ -58,11 +58,11 @@ public class TicTacToeBoard implements Board {
 
     public static RuleSet<TicTacToeBoard> getRules(){
         RuleSet<TicTacToeBoard> ruleSet = new RuleSet<>();
-        ruleSet.add(new Rule<>(board -> outerTraversals(board::getSymbol)));
-        ruleSet.add(new Rule<>(board -> outerTraversals((row, col) -> board.getSymbol(col, row))));
-        ruleSet.add(new Rule<>(board -> traverse(i -> board.getSymbol(i,i))));
-        ruleSet.add(new Rule<>(board -> traverse(i -> board.getSymbol(i,2-i))));
-        ruleSet.add(new Rule<>(TicTacToeBoard::countMoves));
+        ruleSet.add(new Rule(board -> outerTraversals(board::getSymbol)));
+        ruleSet.add(new Rule(board -> outerTraversals((row, col) -> board.getSymbol(col, row))));
+        ruleSet.add(new Rule(board -> traverse(i -> board.getSymbol(i,i))));
+        ruleSet.add(new Rule(board -> traverse(i -> board.getSymbol(i,2-i))));
+        ruleSet.add(new Rule(board -> countMoves((TicTacToeBoard) board)));
         return ruleSet;
     }
 
