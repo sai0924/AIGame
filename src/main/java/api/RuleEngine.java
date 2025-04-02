@@ -28,7 +28,7 @@ public class RuleEngine {
                             boolean canStillWin = false;
                             for (int k = 0; k < 3; k++) {
                                 for (int l = 0; l < 3; l++) {
-                                    TicTacToeBoard boardCopy1 = (TicTacToeBoard) boardCopy.getCopy();
+                                    TicTacToeBoard boardCopy1 = boardCopy.getCopy();
                                     if (boardCopy1.getSymbol(k, l) == null) {
                                         forkCell = new Cell(k, l);
                                         boardCopy1.move(new Move(forkCell, player.flip()));

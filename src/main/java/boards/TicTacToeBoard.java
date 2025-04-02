@@ -14,6 +14,8 @@ import java.util.function.Function;
 public class TicTacToeBoard implements CellBoard {
     String[][] cells = new String[3][3];
 
+    private History history;
+
     public String getSymbol(int row, int col) {
         return cells[row][col];
     }
@@ -43,12 +45,15 @@ public class TicTacToeBoard implements CellBoard {
     }
 
     @Override
-    public void move(Move move) {
-        setCell(move.getCell(),move.getPlayer().symbol());
+    public TicTacToeBoard move(Move move) {
+        TicTacToeBoard board = getCopy();
+        board.setCell(move.getCell(),move.getPlayer().symbol());
+        history.add(board);
+        return board;
     }
 
     @Override
-    public Board getCopy() {
+    public TicTacToeBoard getCopy() {
         TicTacToeBoard board = new TicTacToeBoard();
         for(int i=0;i<3;i++){
             System.arraycopy(this.cells[i], 0, board.cells[i], 0, 3);
@@ -111,3 +116,4 @@ public class TicTacToeBoard implements CellBoard {
         return null;
     }
 }
+
