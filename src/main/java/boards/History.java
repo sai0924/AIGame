@@ -9,21 +9,21 @@ import java.util.Map;
 
 public class History {
 
-    List<Board> boards = new ArrayList<>();
+    List<Representation> representations = new ArrayList<>();
 
-    public Board getBoardAtMove(int moveIndex){
-        if (boards.size() > moveIndex + 1) {
-            boards.subList(moveIndex + 1, boards.size()).clear();
+    public Representation getBoardAtMove(int moveIndex){
+        if (representations.size() > moveIndex + 1) {
+            representations.subList(moveIndex + 1, representations.size()).clear();
         }
-        return boards.get(moveIndex);
+        return representations.get(moveIndex);
     }
 
-    public Board undo() {
-        boards.remove(boards.size()-1);
-        return boards.get(boards.size()-1);
+    public Representation undo() {
+        representations.remove(representations.size()-1);
+        return representations.get(representations.size()-1);
     }
 
-    public void add(Board board){
-        boards.add(board);
+    public void add(Representation board){
+        representations.add(board);
     }
 }

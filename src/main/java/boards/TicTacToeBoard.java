@@ -48,7 +48,7 @@ public class TicTacToeBoard implements CellBoard {
     public TicTacToeBoard move(Move move) {
         TicTacToeBoard board = getCopy();
         board.setCell(move.getCell(),move.getPlayer().symbol());
-        history.add(board);
+        history.add(new Representation(board));
         return board;
     }
 
@@ -58,6 +58,7 @@ public class TicTacToeBoard implements CellBoard {
         for(int i=0;i<3;i++){
             System.arraycopy(this.cells[i], 0, board.cells[i], 0, 3);
         }
+        board.history = history;
         return board;
     }
 
@@ -114,6 +115,15 @@ public class TicTacToeBoard implements CellBoard {
             return new GameState(true, "-");
         }
         return null;
+    }
+
+    public enum Symbol{
+        X("X"),O("O");
+
+        final String marker;
+        Symbol(String marker) {
+            this.marker = marker;
+        }
     }
 }
 

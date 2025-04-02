@@ -1,9 +1,15 @@
 package api;
 
+import boards.CellBoard;
 import boards.TicTacToeBoard;
 import game.*;
+import placements.DefensivePlacement;
+import placements.OffensivePlacement;
+import placements.Placement;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class RuleEngine {
 
@@ -13,44 +19,35 @@ public class RuleEngine {
         ruleMap.put(TicTacToeBoard.class.getName(),TicTacToeBoard.getRules());
     }
 
-    public GameInfo getInfo(Board board){
+    public GameInfo getInfo(CellBoard board){
         if(board instanceof TicTacToeBoard){
             GameState gameState = getState(board);
-            String[] players = new String[]{"X","O"};
-            Cell forkCell = null;
-            for(int index=0;index<2;index++) {
+            for(TicTacToeBoard.Symbol symbol : TicTacToeBoard.Symbol.values()) {
+                Player player = new Player(symbol.name());
                 for (int i = 0; i < 3; i++) {
                     for (int j = 0; j < 3; j++) {
                         TicTacToeBoard boardCopy = (TicTacToeBoard) board.getCopy();
                         if (boardCopy.getSymbol(i, j) == null) {
-                            Player player = new Player(players[index]);
-                            board.move(new Move(new Cell(i, j), player));
-                            boolean canStillWin = false;
-                            for (int k = 0; k < 3; k++) {
-                                for (int l = 0; l < 3; l++) {
-                                    TicTacToeBoard boardCopy1 = boardCopy.getCopy();
-                                    if (boardCopy1.getSymbol(k, l) == null) {
-                                        forkCell = new Cell(k, l);
-                                        boardCopy1.move(new Move(forkCell, player.flip()));
-                                        if (getState(boardCopy1).getWinner().equals(player.flip().symbol())) {
-                                            canStillWin = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (canStillWin) {
-                                    break;
+                            boardCopy = boardCopy.move(new Move(new Cell(i, j), player));
+                            //force opponent to make a defensive move
+                            //we still win after that
+                            DefensivePlacement defensivePlacement = DefensivePlacement.get();
+                            Optional<Cell> defenciveCell = defensivePlacement.place(boardCopy,player.flip());
+                            if(defenciveCell.isPresent()) {
+                                boardCopy = boardCopy.move(new Move(defenciveCell.get(),player.flip()));
+                                OffensivePlacement offensivePlacement = OffensivePlacement.get();
+                                Optional<Cell> offensiveCell = offensivePlacement.place(boardCopy, player);
+                                if(offensiveCell.isPresent()) {
+                                    return new GameInfoBuilder()
+                                            .isOver(gameState.isOver())
+                                            .hasFork(true)
+                                            .forkCell(new Cell(i, j))
+                                            .player(player.flip())
+                                            .winner(gameState.getWinner())
+                                            .build();
                                 }
                             }
-                            if (canStillWin) {
-                                 return new GameInfoBuilder()
-                                         .isOver(gameState.isOver())
-                                         .hasFork(true)
-                                         .forkCell(forkCell)
-                                         .player(player.flip())
-                                         .winner(gameState.getWinner())
-                                         .build();
-                            }
+
                         }
                     }
                 }
